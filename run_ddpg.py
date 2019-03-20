@@ -5,13 +5,15 @@ import gym
 from ddpg import DDPG
 # import matplotlib.pyplot as plt
 import pickle
+import tensorflow as tf
 
 env = gym.make('HalfCheetah-v2')
 
-agent = DDPG(a_dim=6, s_dim=17, a_bound=1)
+agent = DDPG(a_dim=6, s_dim=17, a_bound=1, lr_a=0.0001,lr_c=0.001)
 exploration_rate = 0.2
 np.random.seed(1)
 env.seed(1)
+tf.set_random_seed(1)
 
 total_reward = []
 for episode in range(1000):
@@ -19,6 +21,7 @@ for episode in range(1000):
     var = 0.1
     cum_reward = 0
     for step in range(1000):
+        # action = np.clip(np.random.normal(np.reshape(agent.choose_action(state), [6, ]), var), -1, 1)
         if np.random.uniform() > exploration_rate:
             action = np.clip(np.random.normal(np.reshape(agent.choose_action(state), [6, ]), var), -1, 1)
         else:
@@ -28,7 +31,7 @@ for episode in range(1000):
         cum_reward += reward
         agent.store_transition(state, action, reward, next_state, done)
         state = next_state
-        grad = agent.learn()
+        agent.learn()
         if done:
             print('Episode', episode, ' Complete at reward ', cum_reward, '!!!')
             # print('Final velocity x is ',state[9])
@@ -45,4 +48,4 @@ for episode in range(1000):
 # plt.ylabel('Total reward')
 # plt.title('MountainCar continuous')
 # plt.savefig('ddpg')
-pickle.dump(total_reward, open('DDPG', 'wb'))
+pickle.dump(total_reward, open('ddpg_v2', 'wb'))

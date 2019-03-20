@@ -99,7 +99,7 @@ class ARSTrainer:
         self.normalizer = normalizer or Normalizer(self.input_size)
         self.policy = policy or Policy(self.input_size, self.output_size, self.hp)
         self.record_video = False
-        self.ddpg_trainer = DDPG(a_dim=6, s_dim=17, a_bound=1)
+        self.ddpg_trainer = DDPG(a_dim=6, s_dim=17, a_bound=1,gamma=1)
 
     # Explore the policy on one specific direction and over one episode
     def explore(self, direction=None, delta=None, print_done=False, store_transition=False):
@@ -151,11 +151,11 @@ class ARSTrainer:
             self.policy.update(rollouts, sigma_rewards)
 
             ddpg_grad = 0
-            for step2 in range(100):  # 这个100可以当做是hyper_parameter
+            for step2 in range(50):  # 这个100可以当做是hyper_parameter
                 grad = self.ddpg_trainer.learn()
                 ddpg_grad += grad
 
-            self.policy.update_by_ddpg(ddpg_grad.T/100)
+            self.policy.update_by_ddpg(ddpg_grad.T/50)
             self.ddpg_trainer.memory_flush()
 
             # Only record video during evaluation, every n steps

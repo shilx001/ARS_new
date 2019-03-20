@@ -17,8 +17,8 @@ class DDPG(object):
         self.memory_capacity, self.batch_size, self.hidden_size, self.replay_start, self.std_dev = \
             memory_capacity, batch_size, hidden_size, replay_start, std_dev
         self.tau = tau
-        tf.set_random_seed(1)
         np.random.seed(1)
+        tf.set_random_seed(1)
 
         self.memory = np.zeros((self.memory_capacity, s_dim * 2 + a_dim + 2), dtype=np.float64)
         self.pointer = 0
