@@ -105,9 +105,9 @@ class ARSTrainer:
         self.normalizer = normalizer or Normalizer(self.input_size)
         self.policy = policy or Policy(self.input_size, self.output_size, self.hp)
         self.record_video = False
-        self.ddpg_trainer = DDPG(a_dim=input_size or self.env.observation_space.shape[0],
-                                 s_dim=output_size or self.env.action_space.shape[0], a_bound=1, gamma=1,
-                                 c_lr=self.hp.ddpg_c_lr)
+        self.ddpg_trainer = DDPG(s_dim=input_size or self.env.observation_space.shape[0],
+                                 a_dim=output_size or self.env.action_space.shape[0], a_bound=1, gamma=1,
+                                 lr_c=self.hp.ddpg_c_lr)
 
     # Explore the policy on one specific direction and over one episode
     def explore(self, direction=None, delta=None, print_done=False, store_transition=False):
