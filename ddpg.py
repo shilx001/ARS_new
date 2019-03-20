@@ -12,13 +12,15 @@ class DDPG(object):
                  hidden_size=64,
                  replay_start=1000,
                  std_dev=0.01,
-                 tau=0.001):
+                 tau=0.001,
+                 seed=1):
         self.lr_a, self.lr_c, self.gamma = lr_a, lr_c, gamma
         self.memory_capacity, self.batch_size, self.hidden_size, self.replay_start, self.std_dev = \
             memory_capacity, batch_size, hidden_size, replay_start, std_dev
         self.tau = tau
-        np.random.seed(1)
-        tf.set_random_seed(1)
+        self.seed = seed
+        np.random.seed(self.seed)
+        tf.set_random_seed(self.seed)
 
         self.memory = np.zeros((self.memory_capacity, s_dim * 2 + a_dim + 2), dtype=np.float64)
         self.pointer = 0

@@ -16,7 +16,10 @@ class HP:
                  noise=0.03,
                  seed=1,
                  env=None,
-                 record_every=50):
+                 record_every=50,
+                 ddpg_step=100,
+                 ddpg_normalized_parameter=1.0 / 100,
+                 ddpg_c_lr=1e-4):
         self.nb_steps = nb_steps  # rollout number
         self.episode_length = episode_length  # 每个episode的长度
         self.learning_rate = learning_rate
@@ -27,6 +30,9 @@ class HP:
         self.seed = seed  # random seed
         self.env = env
         self.record_every = record_every
+        self.ddpg_step = ddpg_step
+        self.ddpg_normalized_parameter = ddpg_normalized_parameter
+        self.ddpg_c_lr = ddpg_c_lr
 
 
 class Normalizer:
@@ -99,7 +105,9 @@ class ARSTrainer:
         self.normalizer = normalizer or Normalizer(self.input_size)
         self.policy = policy or Policy(self.input_size, self.output_size, self.hp)
         self.record_video = False
-        self.ddpg_trainer = DDPG(a_dim=6, s_dim=17, a_bound=1,gamma=1)
+        self.ddpg_trainer = DDPG(a_dim=input_size or self.env.observation_space.shape[0],
+                                 s_dim=output_size or self.env.action_space.shape[0], a_bound=1, gamma=1,
+                                 c_lr=self.hp.ddpg_c_lr)
 
     # Explore the policy on one specific direction and over one episode
     def explore(self, direction=None, delta=None, print_done=False, store_transition=False):
@@ -145,17 +153,17 @@ class ARSTrainer:
             order = sorted(scores.keys(), key=lambda x: scores[x], reverse=True)[:self.hp.num_best_deltas]
             rollouts = [(positive_rewards[k], negative_rewards[k], deltas[k]) for k in order]
 
-            self.ddpg_trainer.update_actor(self.policy.theta.T)#更新前或者更新后
+            self.ddpg_trainer.update_actor(self.policy.theta.T)  # 更新前或者更新后
 
             # Update the policy
             self.policy.update(rollouts, sigma_rewards)
 
             ddpg_grad = 0
-            for step2 in range(50):  # 这个100可以当做是hyper_parameter
+            for step2 in range(self.hp.ddpg_step):  # 这个100可以当做是hyper_parameter
                 grad = self.ddpg_trainer.learn()
                 ddpg_grad += grad
 
-            self.policy.update_by_ddpg(ddpg_grad.T/50)
+            self.policy.update_by_ddpg(ddpg_grad.T * self.hp.ddpg_normalized_parameter)
             self.ddpg_trainer.memory_flush()
 
             # Only record video during evaluation, every n steps
