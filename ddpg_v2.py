@@ -14,13 +14,15 @@ class DDPG:
                  hidden_size=64,
                  replay_start=100,
                  std_dev=0.01,
-                 tau=0.001):
+                 tau=0.001,
+                 seed=1):
         self.lr_a, self.lr_c, self.gamma = lr_a, lr_c, gamma
         self.memory_capacity, self.batch_size, self.hidden_size, self.replay_start, self.std_dev = \
             memory_capacity, batch_size, hidden_size, replay_start, std_dev
         self.tau = tau
-        tf.set_random_seed(1)
-        np.random.seed(1)
+        self.seed = seed
+        tf.set_random_seed(seed)
+        np.random.seed(seed)
 
         self.memory = np.zeros((self.memory_capacity, s_dim * 2 + a_dim + 2), dtype=np.float64)
         self.pointer = 0
@@ -64,7 +66,7 @@ class DDPG:
         self.sess.run(self.atrain, feed_dict={self.S: bs})
         self.sess.run(self.ctrain, feed_dict={self.S: bs, self.a: ba, self.R: br, self.S_: bs_, self.done: bdone})
         grad = self.sess.run(self.a_gradients, feed_dict={self.S: bs})
-        return np.reshape(grad,[self.s_dim,self.a_dim])
+        return np.reshape(grad, [self.s_dim, self.a_dim])
 
     def store_transition(self, s, a, r, s_, done):  # 每次存储一个即可
         s = np.reshape(np.array(s), [self.s_dim, 1])
@@ -106,7 +108,7 @@ class DDPG:
         update_op = tf.assign(self.a_params[0], value)
         self.sess.run(update_op)
         self.w1_value = self.sess.run(self.a_params)
-        #print(self.w1_value)
+        # print(self.w1_value)
 
     def choose_action(self, s):
         s = np.reshape(s, [-1, self.s_dim])

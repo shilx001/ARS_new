@@ -9,7 +9,7 @@ import tensorflow as tf
 
 env = gym.make('HalfCheetah-v2')
 
-agent = DDPG(a_dim=6, s_dim=17, a_bound=1, lr_a=0.0001,lr_c=0.001)
+agent = DDPG(a_dim=6, s_dim=17, a_bound=1, lr_a=0.0001,lr_c=0.001, seed=1)
 exploration_rate = 0.2
 np.random.seed(1)
 env.seed(1)
