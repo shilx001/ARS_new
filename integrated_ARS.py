@@ -19,7 +19,8 @@ class HP:
                  record_every=50,
                  ddpg_step=100,
                  ddpg_normalized_parameter=1.0 / 100,
-                 ddpg_c_lr=1e-4):
+                 ddpg_c_lr=1e-4,
+                 namespace='default'):
         self.nb_steps = nb_steps  # rollout number
         self.episode_length = episode_length  # 每个episode的长度
         self.learning_rate = learning_rate
@@ -33,6 +34,7 @@ class HP:
         self.ddpg_step = ddpg_step
         self.ddpg_normalized_parameter = ddpg_normalized_parameter
         self.ddpg_c_lr = ddpg_c_lr
+        self.namespace=namespace
 
 
 class Normalizer:
@@ -107,7 +109,7 @@ class ARSTrainer:
         self.record_video = False
         self.ddpg_trainer = DDPG(s_dim=input_size or self.env.observation_space.shape[0],
                                  a_dim=output_size or self.env.action_space.shape[0], a_bound=1, gamma=1,
-                                 lr_c=self.hp.ddpg_c_lr,seed=self.hp.seed)
+                                 lr_c=self.hp.ddpg_c_lr,seed=self.hp.seed,namespace=self.hp.namespace)
 
     # Explore the policy on one specific direction and over one episode
     def explore(self, direction=None, delta=None, print_done=False, store_transition=False):

@@ -12,7 +12,7 @@ env = gym.make('HalfCheetah-v2')
 seeds=[1,2,3,4,5]
 
 for i in range(len(seeds)):
-    agent = DDPG(a_dim=6, s_dim=17, a_bound=1, lr_a=0.0001,lr_c=0.001, seed=seeds[i])
+    agent = DDPG(a_dim=6, s_dim=17, a_bound=1, lr_a=0.0001,lr_c=0.001, seed=seeds[i],namespace='ddpg_'+str(i))
     exploration_rate = 0.2
     np.random.seed(seeds[i])
     env.seed(seeds[i])
@@ -45,4 +45,4 @@ for i in range(len(seeds)):
                 # print('Final velocity x is ', state[9])
                 # print('Final velocity z is ', state[10])
         total_reward.append(cum_reward)
-    pickle.dump(total_reward, open('halfcheetah_ddpg_'+str(i), 'wb'))
+    #pickle.dump(total_reward, open('halfcheetah_ddpg_'+str(i), 'wb'))

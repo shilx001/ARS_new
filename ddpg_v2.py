@@ -15,12 +15,14 @@ class DDPG:
                  replay_start=100,
                  std_dev=0.01,
                  tau=0.001,
-                 seed=1):
+                 seed=1,
+                 namespace="default"):
         self.lr_a, self.lr_c, self.gamma = lr_a, lr_c, gamma
         self.memory_capacity, self.batch_size, self.hidden_size, self.replay_start, self.std_dev = \
             memory_capacity, batch_size, hidden_size, replay_start, std_dev
         self.tau = tau
         self.seed = seed
+        self.namespace=namespace
         tf.set_random_seed(seed)
         np.random.seed(seed)
 
@@ -34,8 +36,8 @@ class DDPG:
         self.a = self._build_a(self.S)
         self.done = tf.placeholder(tf.float64, [None, ], name='done')
         q = self._build_c(self.S, self.a)
-        self.a_params = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Actor')
-        c_params = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Critic')
+        self.a_params = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Actor_'+self.namespace)
+        c_params = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Critic_'+self.namespace)
 
         a_ = self._build_a(self.S_, reuse=True)
         q_ = self._build_c(self.S_, a_, reuse=True)
@@ -82,13 +84,13 @@ class DDPG:
 
     def _build_a(self, s, reuse=None, custom_getter=None):
         trainable = True if reuse is None else False
-        with tf.variable_scope('Actor', reuse=reuse, custom_getter=custom_getter):
+        with tf.variable_scope('Actor_'+self.namespace, reuse=reuse, custom_getter=custom_getter):
             w1 = tf.Variable(np.zeros([self.s_dim, self.a_dim]), trainable=trainable)
             return tf.matmul(s, w1)
 
     def _build_c(self, s, a, reuse=None, custom_getter=None):
         trainable = True if reuse is None else False
-        with tf.variable_scope('Critic', reuse=reuse, custom_getter=custom_getter):
+        with tf.variable_scope('Critic_'+self.namespace, reuse=reuse, custom_getter=custom_getter):
             input_s = tf.reshape(s, [-1, self.s_dim])
             input_a = tf.reshape(a, [-1, self.a_dim])
             input_all = tf.concat([input_s, input_a], axis=1)  # s: [batch_size, s_dim]
