@@ -1,13 +1,13 @@
-from integrated_ARS import *
+from integrated_ARS_v2 import *
 import gym
 # import matplotlib.pyplot as plt
-# explore the difference between actions
 import pickle
 
-coefficients = [0.01, 0.02, 0.05, 0.1, 0.5]
-for i in range(len(coefficients)):
+seeds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+for i in range(len(seeds)):
     hp = HP(env=gym.make('HalfCheetah-v2'), noise=0.03, nb_steps=1000, episode_length=1000, num_deltas=16,
-            num_best_deltas=16, learning_rate=0.02, seed=1, namespace='arsddpg_' + str(i),ddpg_normalized_parameter=coefficients[i])
+            num_best_deltas=16, learning_rate=0.02, seed=seeds[i], namespace='arsddpg_' + str(i))
     trainer = ARSTrainer(hp=hp, monitor_dir=None, input_size=17, output_size=6)
     reward = trainer.train()
-    pickle.dump(reward, open('halfcheetah_arsddpg_' + str(i)+'_coefficients_'+str(coefficients[i]), 'wb'))
+    pickle.dump(reward, open('halfcheetah_v2_arsddpg_' + str(i), 'wb'))
